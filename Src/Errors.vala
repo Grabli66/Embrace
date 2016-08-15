@@ -1,0 +1,3 @@
+internal errordomain Errors {
+    Common;
+}

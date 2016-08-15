@@ -1,0 +1,12 @@
+
+    {
+        "Name" : "shit",
+        "Description" : "",
+        "Version" : "0.1",
+        "AppType" : "console",
+        "Source" : ["./Src"],
+        "OutPath" : "./Bin",
+        "Dependency" : [
+        ]
+    }
+    

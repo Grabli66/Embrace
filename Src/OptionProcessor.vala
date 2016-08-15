@@ -1,3 +1,6 @@
+/*
+*   Process args
+*/
 [Compact]
 internal class OptionProcessor { 
     private static string? projectName;
@@ -33,6 +36,12 @@ internal class OptionProcessor {
 
         if (projectName != null) {
             InitCommand.Process (projectName);
+            return;
+        }
+
+        if (isBuild) {
+            BuildCommand.Process ();
+            return;
         }
     }
 }

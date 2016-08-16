@@ -23,13 +23,13 @@ Project file format:
 # Usage.
 
 Create new project (WORK): 
-##### embrace --init
+#### embrace --init
 
 Build project (PARTIALY WORK):
-##### embrace --build
+#### embrace --build
 
 Update project dependency (NOT WORK):
-##### embrace --update
+#### embrace --update
 
 Clean project from unused files (NOT WORK):
-#####embrace --clean
+#### embrace --clean

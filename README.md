@@ -2,10 +2,11 @@
 Project and dependency manager for vala
 
 Project file format:
-```json
+```javascript
 {
     "Name" : "ProjectName",
-    "Description" : "",
+    "Description" : "Some project description",
+    "Tags" : ["console", "tool", "net"],
     "Version" : "0.1",
     "AppType" : "console",
     "Source" : ["./Src"],
@@ -18,3 +19,17 @@ Project file format:
     ]
 }
 ```
+
+# Usage.
+
+Create new project (WORK): 
+embrace --init
+
+Build project (PARTIALY WORK):
+embrace --build
+
+Update project dependency (NOT WORK):
+embrace --update
+
+Clean project from unused files (NOT WORK):
+embrace --clean

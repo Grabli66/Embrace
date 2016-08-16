@@ -3,7 +3,7 @@
 */
 [Compact]
 internal class OptionProcessor { 
-    private static string? projectName;
+    private static bool isInit;
 
     private static bool isUpdate;
 
@@ -12,7 +12,7 @@ internal class OptionProcessor {
     private static bool isClean;
 
     private const GLib.OptionEntry[] options = {
-        { "init", 0, 0, OptionArg.STRING, ref projectName, "Initialize new project", null },
+        { "init", 0, 0, OptionArg.NONE, ref isInit, "Initialize new project", null },
         { "update", 0, 0, OptionArg.NONE, ref isUpdate, "Update all dependencies", null },
         { "build", 0, 0, OptionArg.NONE, ref isBuild, "Build project", null },
         { "clean", 0, 0, OptionArg.NONE, ref isClean, "Clean project", null },
@@ -34,8 +34,8 @@ internal class OptionProcessor {
             ErrorLn (e.message);
         }
 
-        if (projectName != null) {
-            InitCommand.Process (projectName);
+        if (isInit) {
+            InitCommand.Process ();
             return;
         }
 

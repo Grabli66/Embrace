@@ -3,7 +3,10 @@
 */
 internal class Project : Object { 
     private const string DEPENDENCY_NAME = "Dependency";
+    private const string NAME_NAME = "Name";
     private const string SOURCE_NAME = "Source";
+    private const string LIBS_NAME = "Libs";
+    private const string OUT_NAME = "OutPath";
 
     /*
     *   Project name
@@ -21,9 +24,19 @@ internal class Project : Object {
     public string Version { get; private set; }
 
     /*
+    *   Out path
+    */
+    public string OutPath { get; private set; }
+
+    /*
     *   Paths to sources
     */
     public string[] Sources { get; private set; }
+
+    /*
+    *   Libs name. Example: gio-2.0, json-glib-1.0
+    */
+    public string[] Libs { get; private set; }
 
     /*
     *   Dependency
@@ -31,7 +44,7 @@ internal class Project : Object {
     public string[] Dependency { get; private set; }
 
     /*
-    *   Enumerate files with extension
+    *   Enumerate files with extension recursive
     */
     private string[] EnumerateFiles (string path, string ext) throws Errors.Common {
         try {
@@ -69,6 +82,9 @@ internal class Project : Object {
             parser.load_from_file (filepath);
             var root = parser.get_root ().get_object ();
 
+            Name = root.get_string_member (NAME_NAME);
+            OutPath = root.get_string_member (OUT_NAME);
+
             // Sources
             var sourceArr = root.get_array_member (SOURCE_NAME);
             var sourceList = new Gee.ArrayList<string> ();
@@ -77,6 +93,15 @@ internal class Project : Object {
                 sourceList.add (sourceName);
             });
             Sources = sourceList.to_array ();
+
+            // Libs
+            var libArr = root.get_array_member (LIBS_NAME);
+            var libList = new Gee.ArrayList<string> ();
+            libArr.foreach_element ((arr, ind, nod) => {
+                var libName = nod.get_string ();
+                libList.add (libName);
+            });
+            Libs = libList.to_array ();
 
             // Dependency
             var dependencyArr = root.get_array_member (DEPENDENCY_NAME);
@@ -96,11 +121,31 @@ internal class Project : Object {
     */
     public string[] GetAllSources () throws Errors.Common {
         try {
+            var sources = new Gee.ArrayList<string> ();
             foreach (var path in Sources) {
-                return EnumerateFiles (path, Global.VALA_NAME);
+                var files = EnumerateFiles (path, Global.VALA_NAME);
+                foreach (var fl in files) {
+                    sources.add (fl);
+                }
             }
 
-            throw new Errors.Common ("No source files");
+            if (sources.size < 1) throw new Errors.Common ("No source files");
+            return sources.to_array ();
+        } catch (Errors.Common e) {
+            throw e;
+        } 
+    }
+
+    /*
+    *   Return all sources with all dependency
+    */
+    public string[] GetAllLibs () throws Errors.Common {
+        try {
+            var libArr = new Gee.ArrayList <string> ();
+            foreach (var lib in Libs) {
+                libArr.add (lib);
+            }
+            return libArr.to_array ();
         } catch (Errors.Common e) {
             throw e;
         } 

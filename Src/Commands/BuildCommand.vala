@@ -34,6 +34,7 @@ internal class BuildCommand {
     private static void BuildProject () throws Errors.Common {
         var project = new Project (".");
         var sources = project.GetAllSources ();
+        var libs = project.GetAllLibs ();
 
         var argList = new Gee.ArrayList<string> ();
         try {
@@ -42,6 +43,15 @@ internal class BuildCommand {
             foreach (var src in sources) {
                 argList.add (src);
             }
+
+            foreach (var lib in libs) {
+                argList.add ("--pkg");
+                argList.add (lib);
+            }
+            
+            argList.add ("-o");
+            var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, project.Name);
+            argList.add (outPath);
             GLib.Process.spawn_sync (".", argList.to_array (), Environ.get (), SpawnFlags.SEARCH_PATH, null);
         } catch (Error e) {
             ErrorLn (e.message);

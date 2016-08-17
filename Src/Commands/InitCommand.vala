@@ -4,25 +4,6 @@
 [Compact]
 internal class InitCommand {
     /*
-    *   New project content
-    */
-    private const string PROJECT_CONTENT = 
-    "
-    {
-        \"Name\" : \"ProjectName\",
-        \"Description\" : \"\",
-        \"Version\" : \"0.1\",
-        \"AppType\" : \"console\",
-        \"Source\" : [\"./Src\"],
-        \"OutPath\" : \"./Bin\",
-        \"Libs\" : [
-        ],
-        \"Dependency\" : [
-        ]
-    }
-    ";
-
-    /*
     *   Process command
     */
     public static void Process () {
@@ -33,7 +14,7 @@ internal class InitCommand {
 
             var fstr = file.append_to (FileCreateFlags.NONE);
             var data_stream = new DataOutputStream (fstr);
-            data_stream.put_string (PROJECT_CONTENT);
+            data_stream.put_string (Project.PROJECT_CONTENT);
             InfoLn ("Done");
         } catch (Error e) {
             ErrorLn (e.message);

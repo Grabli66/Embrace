@@ -1,0 +1,15 @@
+{
+    "Name" : "Embrace",
+    "Description" : "Project and dependency manager for vala",
+    "Version" : "0.1",
+    "ProjectType" : "app",
+    "Source" : ["./Src"],
+    "OutPath" : "./Bin",
+    "Libs" : [
+        "gio-2.0",
+        "json-glib-1.0",
+        "gee-0.8"
+    ],
+    "Dependency" : [
+    ]
+}

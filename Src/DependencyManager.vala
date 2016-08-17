@@ -3,24 +3,13 @@
 */
 [Compact]
 internal class DependencyManager {
-
-    /*
-    *   Prepare DEPS path
-    */
-    private static void PreparePath () throws Error {
-        var file = File.new_for_path (Global.DEP_CACHE_NAME);
-        if (!file.query_exists ()) {
-            file.make_directory ();
-        }
-    }
-
     /*
     *   Return dependency name from url
     */
-    private static string GetDependencyPath (string url) {
+    public static string GetDependencyPath (string url) {
         var items = url.split ("/");
         var name = items[items.length - 1];
-        var path = @"$(Global.DEP_CACHE_NAME)/$name";
+        var path = Path.build_path (Global.DIR_SEPARATOR, Global.DEP_CACHE_NAME, name);
         return path;
     }
 
@@ -43,7 +32,7 @@ internal class DependencyManager {
     */
     public static void UpdateDependency (string url) throws Errors.Common {
         try {
-            PreparePath ();
+            FileUtils.PreparePath (Global.DEP_CACHE_NAME);
             var path = GetDependencyPath (url);
             var file = File.new_for_path (path);
             if (!file.query_exists ()) {
@@ -54,13 +43,13 @@ internal class DependencyManager {
 
             var project = new Project (path);
             foreach (var depName in project.Dependency) {
-                DependencyManager.UpdateDependency (depName);
+                DependencyManager.CheckDependency (depName);
             }
         } catch (Errors.Common e) {
             throw e;
         }  
         catch {
-            throw new Errors.Common ("Cant check/update dependency");
+            throw new Errors.Common ("Cant update dependency");
         }
     }
 }

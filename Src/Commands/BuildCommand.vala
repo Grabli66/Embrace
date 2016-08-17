@@ -1,16 +1,6 @@
 [Compact]
 internal class BuildCommand {
     /*
-    *   Prepare DEPS path
-    */
-    private static void PreparePath () throws Error {
-        var file = File.new_for_path ("./Bin");
-        if (!file.query_exists ()) {
-            file.make_directory ();
-        }
-    }
-
-    /*
     *   Check project file exists
     */
     private static void CheckExists () throws Errors.Common {
@@ -37,22 +27,43 @@ internal class BuildCommand {
         var libs = project.GetAllLibs ();
 
         var argList = new Gee.ArrayList<string> ();
+
         try {
-            PreparePath ();
+            FileUtils.PreparePath (project.OutPath);
+            var name = project.Name.down ();
+
             argList.add ("valac");
             foreach (var src in sources) {
                 argList.add (src);
             }
 
             foreach (var lib in libs) {
-                argList.add ("--pkg");
-                argList.add (lib);
+                argList.add (@"--pkg=$(lib)");
             }
             
-            argList.add ("-o");
-            var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, project.Name);
-            argList.add (outPath);
-            GLib.Process.spawn_sync (".", argList.to_array (), Environ.get (), SpawnFlags.SEARCH_PATH, null);
+            if (project.ProjectType == ProjectTypeEnum.APP) {
+                argList.add ("-o");
+                var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, name);
+                argList.add (outPath);
+            }  else if (project.ProjectType == ProjectTypeEnum.LIBRARY) {
+                var outBin = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).so");
+                var outVapi= Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).vapi");
+                argList.add ("--library");
+                argList.add (name);
+                argList.add ("--vapi");
+                argList.add (outVapi);
+                argList.add ("-X");
+                argList.add ("-fPIC");
+                argList.add ("-X");
+                argList.add ("-shared");
+                argList.add ("-o");
+                argList.add (outBin);
+            }
+
+            var argArr = argList.to_array ();
+            var commandLine = string.joinv (" ", argArr);
+            InfoLn (commandLine);
+            GLib.Process.spawn_command_line_sync (commandLine);
         } catch (Error e) {
             ErrorLn (e.message);
             throw new Errors.Common ("Cant compile sources");

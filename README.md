@@ -8,13 +8,11 @@ Project file format:
     "Description" : "Some project description",
     "Tags" : ["console", "tool", "net"],
     "Version" : "0.1",
-    "AppType" : "console",
+    "AppType" : "app",
     "Source" : ["./Src"],
     "OutPath" : "./Bin",
-    "Libs" : [
-        "gee-0.8"
-    ],
     "Dependency" : [
+        "lib://gee-0.8",
         "http://github.com/User/SomeProject"
     ]
 }

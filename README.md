@@ -15,7 +15,7 @@ Project file format:
         "gee-0.8"
     ],
     "Dependency" : [
-        "http://github/User/SomeProject"
+        "http://github.com/User/SomeProject"
     ]
 }
 ```

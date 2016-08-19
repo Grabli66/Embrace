@@ -1,27 +1,39 @@
 /*
-*   Check/update dependency
+*   Dependency manager for github
 */
-[Compact]
-internal class DependencyManager {
+internal class GithubManager : Object, IDependencyManager { 
+    /*
+    *   Url for github project
+    */
+    private string _url;
+
+
     /*
     *   Return dependency name from url
     */
-    public static string GetDependencyPath (string url) {
-        var items = url.split ("/");
+    private string GetDependencyPath () {
+        var items = _url.split ("/");
         var name = items[items.length - 1];
         var path = Path.build_path (Global.DIR_SEPARATOR, Global.DEP_CACHE_NAME, name);
         return path;
     }
 
     /*
+    *   Set path for dependency
+    */
+    public void SetPath (string path) throws Errors.Common {
+        _url = path;
+    }
+
+    /*
     *   Check dependency exists.
     *   If not exists update it
     */
-    public static void CheckDependency (string url) throws Errors.Common {
+    public void CheckDependency () throws Errors.Common {
         try {
-            var path = GetDependencyPath (url);
+            var path = GetDependencyPath ();
             var file = File.new_for_path (path);
-            if (!file.query_exists ()) UpdateDependency (url);
+            if (!file.query_exists ()) UpdateDependency ();
         } catch (Errors.Common e) {
             throw e;
         } 
@@ -30,20 +42,21 @@ internal class DependencyManager {
     /*
     *   Update dependency recursive
     */
-    public static void UpdateDependency (string url) throws Errors.Common {
+    public void UpdateDependency () throws Errors.Common {
         try {
             FileUtils.PreparePath (Global.DEP_CACHE_NAME);
-            var path = GetDependencyPath (url);
+            var path = GetDependencyPath ();
             var file = File.new_for_path (path);
             if (!file.query_exists ()) {
-                GLib.Process.spawn_sync (@"./$(Global.DEP_CACHE_NAME)", { "git", "clone", url }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
+                GLib.Process.spawn_sync (@"./$(Global.DEP_CACHE_NAME)", { "git", "clone", _url }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
             } else {
                 GLib.Process.spawn_sync (path, { "git", "pull" }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
             }
 
             var project = new Project (path);
             foreach (var depName in project.Dependency) {
-                DependencyManager.CheckDependency (depName);
+                var depManager = DependencyFactory.GetManager (depName);
+                depManager.CheckDependency ();
             }
         } catch (Errors.Common e) {
             throw e;
@@ -51,5 +64,13 @@ internal class DependencyManager {
         catch {
             throw new Errors.Common ("Cant update dependency");
         }
+    }
+
+    /*
+    *   Return cloned project
+    */
+    public Project GetProject () {
+        var path = GetDependencyPath ();
+        return new Project (path);
     }
 }

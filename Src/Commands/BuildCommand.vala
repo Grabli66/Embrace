@@ -14,7 +14,8 @@ internal class BuildCommand {
     private static void ProcessDependency () throws Errors.Common {
         var project = new Project (".");
         foreach (var depName in project.Dependency) {
-            DependencyManager.CheckDependency (depName);
+            var depManager = DependencyFactory.GetManager (depName);
+            depManager.CheckDependency ();
         }
     }
 

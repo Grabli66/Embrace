@@ -27,27 +27,22 @@ internal class Project : Object {
     private const string PROJECT_TYPE_NAME = "ProjectType";
     private const string NAME_NAME = "Name";
     private const string SOURCE_NAME = "Source";
-    private const string LIBS_NAME = "Libs";
     private const string OUT_NAME = "OutPath";
 
     /*
     *   New project content
     */
     public const string PROJECT_CONTENT = 
-    "
-    {
-        \"Name\" : \"ProjectName\",
-        \"Description\" : \"\",
-        \"Version\" : \"0.1\",
-        \"ProjectType\" : \"app\",
-        \"Source\" : [\"./Src\"],
-        \"OutPath\" : \"./Bin\",
-        \"Libs\" : [
-        ],
-        \"Dependency\" : [
-        ]
-    }
-    ";
+    "{
+    \"Name\" : \"ProjectName\",
+    \"Description\" : \"Project description\",
+    \"Version\" : \"0.1\",
+    \"ProjectType\" : \"app\",
+    \"Source\" : [\"./Src\"],
+    \"OutPath\" : \"./Bin\",
+    \"Dependency\" : [
+    ]
+}";
 
     /*
     *   Project name
@@ -80,12 +75,7 @@ internal class Project : Object {
     public string[] Sources { get; private set; }
 
     /*
-    *   Libs name. Example: gio-2.0, json-glib-1.0
-    */
-    public string[] Libs { get; private set; }
-
-    /*
-    *   Dependency
+    *   Dependency: libs, github, local
     */
     public string[] Dependency { get; private set; }
 
@@ -144,15 +134,6 @@ internal class Project : Object {
             });
             Sources = sourceList.to_array ();
 
-            // Libs
-            var libArr = root.get_array_member (LIBS_NAME);
-            var libList = new Gee.ArrayList<string> ();
-            libArr.foreach_element ((arr, ind, nod) => {
-                var libName = nod.get_string ();
-                libList.add (libName);
-            });
-            Libs = libList.to_array ();
-
             // Dependency
             var dependencyArr = root.get_array_member (DEPENDENCY_NAME);
             var depList = new Gee.ArrayList<string> ();
@@ -184,9 +165,10 @@ internal class Project : Object {
             }
 
             // Get dependency sources
-            foreach (var dep in Dependency) {
-                var path = DependencyManager.GetDependencyPath (dep);
-                var depProject = new Project (path);
+            foreach (var depName in Dependency) {
+                var depManager = DependencyFactory.GetManager (depName);
+                var depProject = depManager.GetProject ();
+                if (depProject == null) continue;
                 var depSources = depProject.GetAllSources ();
                 foreach (var depSource in depSources) {
                     sources.add (depSource);
@@ -207,18 +189,19 @@ internal class Project : Object {
         try {
             var libArr = new Gee.ArrayList <string> ();
 
-            // Get self libs
-            foreach (var lib in Libs) {
-                libArr.add (lib);
-            }
-
             // Get dependency libs
-            foreach (var dep in Dependency) {
-                var path = DependencyManager.GetDependencyPath (dep);
-                var depProject = new Project (path);
-                var depLibs = depProject.GetAllLibs ();
-                foreach (var depLib in depLibs) {
-                    libArr.add (depLib);
+            foreach (var depName in Dependency) {
+                var depManager = DependencyFactory.GetManager (depName);
+                if (depManager is LibManager) {
+                    var libManager = (LibManager) depManager;
+                    libArr.add (libManager.LibName);
+                } else {
+                    var depProject = depManager.GetProject ();
+                    if (depProject == null) continue;
+                    var depLibs = depProject.GetAllLibs ();
+                    foreach (var depLib in depLibs) {
+                        libArr.add (depLib);
+                    }
                 }
             }
 

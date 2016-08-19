@@ -13,8 +13,8 @@ Project file format:
     "OutPath" : "./Bin",
     "Dependency" : [
         "lib://gee-0.8",
-        "http://github.com/User/SomeProject",
-        "path://../SomeProject"
+        "http://github.com/User/EmbraceProject",
+        "path://../EmbraceProject"
     ]
 }
 ```

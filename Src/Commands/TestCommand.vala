@@ -1,8 +1,8 @@
 /*
-*   Process build command
+*   Process test command
 */
 [Compact]
-internal class BuildCommand {
+internal class TestCommand {
     /*
     *   Update project dependency
     */
@@ -17,19 +17,23 @@ internal class BuildCommand {
     /*
     *   Build project
     */
-    private static void BuildProject () throws Errors.Common {
+    private static void BuildTestProject () throws Errors.Common {
         var project = new Project (".");
         var sources = project.GetAllSources ();
+        var testSources = project.GetTestSources ();
         var libs = project.GetAllLibs ();
 
         var argList = new Gee.ArrayList<string> ();
 
         try {
             FileUtils.PreparePath (project.OutPath);
-            var name = project.Name.down ();
 
             argList.add ("valac");
             foreach (var src in sources) {
+                argList.add (src);
+            }
+
+            foreach (var src in testSources) {
                 argList.add (src);
             }
 
@@ -37,24 +41,9 @@ internal class BuildCommand {
                 argList.add (@"--pkg=$(lib)");
             }
             
-            if (project.ProjectType == ProjectTypeEnum.APP) {
-                argList.add ("-o");
-                var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, name);
-                argList.add (outPath);
-            }  else if (project.ProjectType == ProjectTypeEnum.LIBRARY) {
-                var outBin = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).so");
-                var outVapi= Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).vapi");
-                argList.add ("--library");
-                argList.add (name);
-                argList.add ("--vapi");
-                argList.add (outVapi);
-                argList.add ("-X");
-                argList.add ("-fPIC");
-                argList.add ("-X");
-                argList.add ("-shared");
-                argList.add ("-o");
-                argList.add (outBin);
-            }
+            argList.add ("-o");
+            var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, Global.TESTS_OUT_NAME);
+            argList.add (outPath);
 
             var argArr = argList.to_array ();
             var commandLine = string.joinv (" ", argArr);
@@ -66,16 +55,27 @@ internal class BuildCommand {
         }
     }
 
+    private static void RunTests () throws Errors.Common {
+        try {
+            var project = new Project (".");
+            var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, Global.TESTS_OUT_NAME);
+            GLib.Process.spawn_command_line_sync (outPath);
+        } catch {
+            throw new Errors.Common ("Cant run tests");
+        }
+    }
+
     /*
     *   Process command
     */
     public static void Process () {
         try {
-            InfoLn ("Building project");
+            InfoLn ("Building tests");
             Project.CheckExists (Global.PROJECT_NAME);
             ProcessDependency ();
-            BuildProject ();
-            InfoLn ("Done");
+            BuildTestProject ();
+            InfoLn ("Run tests");
+            RunTests ();
         } catch (Error e) {
             ErrorLn (e.message);
         }

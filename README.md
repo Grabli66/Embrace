@@ -10,6 +10,7 @@ Project file format:
     "Version" : "0.1",
     "AppType" : "app",
     "Source" : ["./Src"],
+    "Tests" : "./Tests",
     "OutPath" : "./Bin",
     "Dependency" : [
         "lib://gee-0.8",
@@ -26,6 +27,9 @@ Create new project (WORK):
 
 Build project (PARTIALY WORK):
 #### embrace --build
+
+Run tests (PARTIALY WORK):
+#### embrace --test
 
 Update project dependency (NOT WORK):
 #### embrace --update

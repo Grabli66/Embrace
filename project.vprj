@@ -1,9 +1,10 @@
 {
     "Name" : "Embrace",
     "Description" : "Project and dependency manager for vala",
-    "Version" : "0.1",
+    "Version" : "0.2",
     "ProjectType" : "app",
     "Source" : ["./Src"],
+    "Tests" : "./Tests",
     "OutPath" : "./Bin",
     "Dependency" : [
         "lib://gio-2.0",

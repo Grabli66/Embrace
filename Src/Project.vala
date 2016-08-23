@@ -27,6 +27,7 @@ internal class Project : Object {
     private const string PROJECT_TYPE_NAME = "ProjectType";
     private const string NAME_NAME = "Name";
     private const string SOURCE_NAME = "Source";
+    private const string TEST_SOURCE_NAME = "Tests";
     private const string OUT_NAME = "OutPath";
 
     /*
@@ -39,6 +40,7 @@ internal class Project : Object {
     \"Version\" : \"0.1\",
     \"ProjectType\" : \"app\",
     \"Source\" : [\"./Src\"],
+    \"Tests\" : \"./Tests\",
     \"OutPath\" : \"./Bin\",
     \"Dependency\" : [
     ]
@@ -73,6 +75,11 @@ internal class Project : Object {
     *   Paths to sources
     */
     public string[] Sources { get; private set; }
+
+    /*
+    *   Paths to test source
+    */
+    public string TestSource { get; private set; }
 
     /*
     *   Dependency: libs, github, local
@@ -112,6 +119,14 @@ internal class Project : Object {
     }
 
     /*
+    *   Check project file exists
+    */
+    public static void CheckExists (string path) throws Errors.Common {
+        var file = File.new_for_path (path);
+        if (!file.query_exists ()) throw new Errors.Common ("Project not exists");
+    }
+
+    /*
     *   Project constructor
     */
     public Project (string path) throws Errors.Common {
@@ -134,6 +149,9 @@ internal class Project : Object {
             });
             Sources = sourceList.to_array ();
 
+            // Test source
+            TestSource = root.get_string_member (TEST_SOURCE_NAME);
+            
             // Dependency
             var dependencyArr = root.get_array_member (DEPENDENCY_NAME);
             var depList = new Gee.ArrayList<string> ();
@@ -180,6 +198,25 @@ internal class Project : Object {
         } catch (Errors.Common e) {
             throw e;
         } 
+    }
+
+    /*
+    *   Return test sources
+    */
+    public string[] GetTestSources () throws Errors.Common {
+         try {
+            var sources = new Gee.ArrayList<string> ();
+            // Get self sources
+            var files = EnumerateFiles (TestSource, Global.VALA_NAME);
+            foreach (var fl in files) {
+                sources.add (fl);
+            }
+
+            if (sources.size < 1) throw new Errors.Common ("No test source files");
+            return sources.to_array ();
+         } catch {
+             throw new Errors.Common ("Cant get test sources");
+         }
     }
 
     /*

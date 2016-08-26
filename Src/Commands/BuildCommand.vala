@@ -6,8 +6,7 @@ internal class BuildCommand {
     /*
     *   Update project dependency
     */
-    private static void ProcessDependency () throws Errors.Common {
-        var project = new Project (".");
+    public static void ProcessDependency (Project project) throws Errors.Common {
         foreach (var depName in project.Dependency) {
             var depManager = DependencyFactory.GetManager (depName);
             depManager.CheckDependency ();
@@ -17,8 +16,7 @@ internal class BuildCommand {
     /*
     *   Build project
     */
-    private static void BuildProject () throws Errors.Common {
-        var project = new Project (".");
+    public static void BuildProject (Project project) throws Errors.Common {
         var sources = project.GetAllSources ();
         var libs = project.GetAllLibs ();
 
@@ -60,9 +58,23 @@ internal class BuildCommand {
             var commandLine = string.joinv (" ", argArr);
             InfoLn (commandLine);
             GLib.Process.spawn_command_line_sync (commandLine);
+        } catch {
+            throw new Errors.Common ("Cant compile sources");
+        }
+    }
+
+    /*
+    *   Build project
+    */
+    public static void BuildPath (string path = ".") {
+        try {
+            InfoLn ("Building project");
+            var project = new Project (path);
+            ProcessDependency (project);
+            BuildProject (project);
+            InfoLn ("Done");
         } catch (Error e) {
             ErrorLn (e.message);
-            throw new Errors.Common ("Cant compile sources");
         }
     }
 
@@ -70,14 +82,6 @@ internal class BuildCommand {
     *   Process command
     */
     public static void Process () {
-        try {
-            InfoLn ("Building project");
-            Project.CheckExists (Global.PROJECT_NAME);
-            ProcessDependency ();
-            BuildProject ();
-            InfoLn ("Done");
-        } catch (Error e) {
-            ErrorLn (e.message);
-        }
+        BuildPath ();
     }
 }

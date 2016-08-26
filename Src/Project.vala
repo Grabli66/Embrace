@@ -47,6 +47,11 @@ internal class Project : Object {
 }";
 
     /*
+    *   Project path
+    */
+    private string _path;
+
+    /*
     *   Project name
     */
     public string Name { get; private set; }
@@ -77,9 +82,9 @@ internal class Project : Object {
     public string[] Sources { get; private set; }
 
     /*
-    *   Paths to test source
+    *   Path to tests
     */
-    public string TestSource { get; private set; }
+    public string Tests { get; private set; }
 
     /*
     *   Dependency: libs, github, local
@@ -113,7 +118,8 @@ internal class Project : Object {
                 }
             }
             return files.to_array ();
-        } catch {
+        } catch (Error e) {
+            InfoLn (e.message);
             throw new Errors.Common ("Cant get source files");
         }
     }
@@ -131,9 +137,12 @@ internal class Project : Object {
     */
     public Project (string path) throws Errors.Common {
         try {
+            _path = FileUtils.GetAbsPath (path);
+            InfoLn (path);
+            InfoLn (_path);
             var parser = new Json.Parser ();
-            var filepath = @"$path/$(Global.PROJECT_NAME)";
-            parser.load_from_file (filepath);
+            var filePath = FileUtils.JoinPath (_path, Global.PROJECT_NAME);
+            parser.load_from_file (filePath);
             var root = parser.get_root ().get_object ();
 
             Name = root.get_string_member (NAME_NAME);
@@ -148,10 +157,12 @@ internal class Project : Object {
                 sourceList.add (sourceName);
             });
             Sources = sourceList.to_array ();
-
-            // Test source
-            TestSource = root.get_string_member (TEST_SOURCE_NAME);
             
+            // Tests
+            if (root.has_member (TEST_SOURCE_NAME)) {
+                Tests = root.get_string_member (TEST_SOURCE_NAME);
+            }
+
             // Dependency
             var dependencyArr = root.get_array_member (DEPENDENCY_NAME);
             var depList = new Gee.ArrayList<string> ();
@@ -176,7 +187,9 @@ internal class Project : Object {
             var sources = new Gee.ArrayList<string> ();
             // Get self sources
             foreach (var path in Sources) {
-                var files = EnumerateFiles (path, Global.VALA_NAME);
+                var npath = FileUtils.JoinPath (_path, path);
+                var shortName = FileUtils.GetShortPath (npath);
+                var files = EnumerateFiles (shortName, Global.VALA_NAME);
                 foreach (var fl in files) {
                     sources.add (fl);
                 }
@@ -198,25 +211,6 @@ internal class Project : Object {
         } catch (Errors.Common e) {
             throw e;
         } 
-    }
-
-    /*
-    *   Return test sources
-    */
-    public string[] GetTestSources () throws Errors.Common {
-         try {
-            var sources = new Gee.ArrayList<string> ();
-            // Get self sources
-            var files = EnumerateFiles (TestSource, Global.VALA_NAME);
-            foreach (var fl in files) {
-                sources.add (fl);
-            }
-
-            if (sources.size < 1) throw new Errors.Common ("No test source files");
-            return sources.to_array ();
-         } catch {
-             throw new Errors.Common ("Cant get test sources");
-         }
     }
 
     /*

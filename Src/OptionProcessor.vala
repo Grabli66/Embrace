@@ -11,13 +11,16 @@ internal class OptionProcessor {
 
     private static bool isTest;
 
+    private static bool isRun;
+
     private static bool isClean;
 
     private const GLib.OptionEntry[] options = {
         { "init", 0, 0, OptionArg.NONE, ref isInit, "Initialize new project", null },
         { "update", 0, 0, OptionArg.NONE, ref isUpdate, "Update all dependencies", null },
         { "build", 0, 0, OptionArg.NONE, ref isBuild, "Build project", null },
-        { "test", 0, 0, OptionArg.NONE, ref isTest, "Run tests", null },
+        { "run", 0, 0, OptionArg.NONE, ref isRun, "Build and run project", null },
+        { "test", 0, 0, OptionArg.NONE, ref isTest, "Run project tests", null },
         { "clean", 0, 0, OptionArg.NONE, ref isClean, "Clean project", null },
         { null }
     };
@@ -44,6 +47,11 @@ internal class OptionProcessor {
 
         if (isBuild) {
             BuildCommand.Process ();
+            return;
+        }
+
+        if (isRun) {
+            RunCommand.Process ();
             return;
         }
 

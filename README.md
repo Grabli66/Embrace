@@ -33,6 +33,3 @@ Run tests (PARTIALY WORK):
 
 Update project dependency (NOT WORK):
 #### embrace --update
-
-Clean project from unused files (NOT WORK):
-#### embrace --clean

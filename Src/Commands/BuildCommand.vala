@@ -8,7 +8,7 @@ internal class BuildCommand {
     */
     public static void ProcessDependency (Project project) throws Errors.Common {
         foreach (var depName in project.Dependency) {
-            var depManager = DependencyFactory.GetManager (depName);
+            var depManager = DependencyFactory.GetManager (depName, project);
             depManager.CheckDependency ();
         }
     }
@@ -23,7 +23,8 @@ internal class BuildCommand {
         var argList = new Gee.ArrayList<string> ();
 
         try {
-            FileUtils.PreparePath (project.OutPath);
+            var buildPath = FileUtils.GetShortPath (FileUtils.JoinPath (project.ProjectPath, project.OutPath));
+            FileUtils.PreparePath (buildPath);
             var name = project.Name.down ();
 
             argList.add ("valac");
@@ -35,13 +36,13 @@ internal class BuildCommand {
                 argList.add (@"--pkg=$(lib)");
             }
             
-            if (project.ProjectType == ProjectTypeEnum.APP) {
-                argList.add ("-o");
-                var outPath = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, name);
+            if (project.ProjectType == ProjectTypeEnum.APP || project.ProjectType == ProjectTypeEnum.TESTS) {
+                argList.add ("-o");                
+                var outPath = Path.build_path (Global.DIR_SEPARATOR, buildPath, name);
                 argList.add (outPath);
             }  else if (project.ProjectType == ProjectTypeEnum.LIBRARY) {
-                var outBin = Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).so");
-                var outVapi= Path.build_path (Global.DIR_SEPARATOR, project.OutPath, @"$(name).vapi");
+                var outBin = Path.build_path (Global.DIR_SEPARATOR, buildPath, @"$(name).so");
+                var outVapi= Path.build_path (Global.DIR_SEPARATOR, buildPath, @"$(name).vapi");
                 argList.add ("--library");
                 argList.add (name);
                 argList.add ("--vapi");

@@ -7,6 +7,10 @@ internal class GithubManager : Object, IDependencyManager {
     */
     private string _url;
 
+    /*
+    *   Parent project
+    */
+    private Project _project;
 
     /*
     *   Return dependency name from url
@@ -14,7 +18,7 @@ internal class GithubManager : Object, IDependencyManager {
     private string GetDependencyPath () {
         var items = _url.split ("/");
         var name = items[items.length - 1];
-        var path = Path.build_path (Global.DIR_SEPARATOR, Global.DEP_CACHE_NAME, name);
+        var path = Path.build_path (Global.DIR_SEPARATOR, Project.DEP_CACHE_NAME, name);
         return path;
     }
 
@@ -23,6 +27,13 @@ internal class GithubManager : Object, IDependencyManager {
     */
     public void SetPath (string path) throws Errors.Common {
         _url = path;
+    }
+
+    /*
+    *   Set parent project
+    */
+    public void SetProject (Project project) throws Errors.Common {
+        _project = project;
     }
 
     /*
@@ -44,18 +55,18 @@ internal class GithubManager : Object, IDependencyManager {
     */
     public void UpdateDependency () throws Errors.Common {
         try {
-            FileUtils.PreparePath (Global.DEP_CACHE_NAME);
+            FileUtils.PreparePath (Project.DEP_CACHE_NAME);
             var path = GetDependencyPath ();
             var file = File.new_for_path (path);
             if (!file.query_exists ()) {
-                GLib.Process.spawn_sync (@"./$(Global.DEP_CACHE_NAME)", { "git", "clone", _url }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
+                GLib.Process.spawn_sync (@"./$(Project.DEP_CACHE_NAME)", { "git", "clone", _url }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
             } else {
                 GLib.Process.spawn_sync (path, { "git", "pull" }, Environ.get (), SpawnFlags.SEARCH_PATH, null);
             }
 
             var project = new Project (path);
             foreach (var depName in project.Dependency) {
-                var depManager = DependencyFactory.GetManager (depName);
+                var depManager = DependencyFactory.GetManager (depName, project);
                 depManager.CheckDependency ();
             }
         } catch (Errors.Common e) {

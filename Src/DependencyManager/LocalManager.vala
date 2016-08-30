@@ -8,6 +8,11 @@ internal class LocalManager : Object, IDependencyManager {
     public string LocalPath;
 
     /*
+    *   Parent project
+    */
+    private Project _project;
+
+    /*
     *   Set path for dependency
     */
     public void SetPath (string path) throws Errors.Common {
@@ -16,6 +21,13 @@ internal class LocalManager : Object, IDependencyManager {
         } catch {
             throw new Errors.Common ("Cant set path to dependency");
         }
+    }
+
+    /*
+    *   Set parent project
+    */
+    public void SetProject (Project project) throws Errors.Common {
+        _project = project;
     }
 
     /*
@@ -36,6 +48,7 @@ internal class LocalManager : Object, IDependencyManager {
     *   Return cloned project
     */
     public Project GetProject () {
-        return new Project (LocalPath);
+        var path = FileUtils.JoinPath (_project.ProjectPath, LocalPath);
+        return new Project (path);
     }
 }

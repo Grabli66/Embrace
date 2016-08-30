@@ -3,10 +3,12 @@
 */
 internal enum ProjectTypeEnum {
     APP,
-    LIBRARY;
+    LIBRARY,
+    TESTS;
 
     public const string APP_NAME = "app";
     public const string LIBRARY_NAME = "library";
+    public const string TESTS_NAME = "tests";
 
     /*
     *   Get project type from string
@@ -14,6 +16,7 @@ internal enum ProjectTypeEnum {
     public static ProjectTypeEnum FromString (string s) throws Errors.Common {
         if (s == APP_NAME) return APP;
         if (s == LIBRARY_NAME) return LIBRARY;
+        if (s == TESTS_NAME) return TESTS;
         throw new Errors.Common (@"Unknown project type $s");
     }
 }
@@ -23,12 +26,16 @@ internal enum ProjectTypeEnum {
 *   Project info
 */
 internal class Project : Object { 
-    private const string DEPENDENCY_NAME = "Dependency";
-    private const string PROJECT_TYPE_NAME = "ProjectType";
-    private const string NAME_NAME = "Name";
-    private const string SOURCE_NAME = "Source";
-    private const string TEST_SOURCE_NAME = "Tests";
-    private const string OUT_NAME = "OutPath";
+    public const string DEP_CACHE_NAME = "Deps";
+    public const string PROJECT_NAME = "project.vprj";
+    public const string DEPENDENCY_NAME = "Dependency";
+    public const string PROJECT_TYPE_NAME = "ProjectType";
+    public const string NAME_NAME = "Name";
+    public const string SOURCE_NAME = "Source";
+    public const string TEST_SOURCE_NAME = "Tests";
+    public const string TESTS_OUT_NAME = "tests";
+    public const string TESTS_MAIN_NAME = "Main.vala";
+    public const string OUT_NAME = "OutPath";
 
     /*
     *   New project content
@@ -47,9 +54,30 @@ internal class Project : Object {
 }";
 
     /*
+    *   New project content
+    */
+    public const string TEST_PROJECT_CONTENT = 
+    "{
+    \"Name\" : \"Tests\",        
+    \"ProjectType\" : \"tests\",
+    \"Source\" : [\".\"],    
+    \"OutPath\" : \"../Bin\",
+    \"Dependency\" : [
+    ]
+}";
+
+    /*
+    *   Main.vala content for tests
+    */
+    public const string TEST_MAIN_CONTENT = """public void main () {
+    stderr.printf ("TEST DONE\n");
+}
+    """;
+
+    /*
     *   Project path
     */
-    private string _path;
+    public string ProjectPath { get; private set; }
 
     /*
     *   Project name
@@ -137,11 +165,9 @@ internal class Project : Object {
     */
     public Project (string path) throws Errors.Common {
         try {
-            _path = FileUtils.GetAbsPath (path);
-            InfoLn (path);
-            InfoLn (_path);
+            ProjectPath = FileUtils.GetAbsPath (path);            
             var parser = new Json.Parser ();
-            var filePath = FileUtils.JoinPath (_path, Global.PROJECT_NAME);
+            var filePath = FileUtils.JoinPath (ProjectPath, PROJECT_NAME);
             parser.load_from_file (filePath);
             var root = parser.get_root ().get_object ();
 
@@ -187,7 +213,7 @@ internal class Project : Object {
             var sources = new Gee.ArrayList<string> ();
             // Get self sources
             foreach (var path in Sources) {
-                var npath = FileUtils.JoinPath (_path, path);
+                var npath = FileUtils.JoinPath (ProjectPath, path);
                 var shortName = FileUtils.GetShortPath (npath);
                 var files = EnumerateFiles (shortName, Global.VALA_NAME);
                 foreach (var fl in files) {
@@ -197,7 +223,7 @@ internal class Project : Object {
 
             // Get dependency sources
             foreach (var depName in Dependency) {
-                var depManager = DependencyFactory.GetManager (depName);
+                var depManager = DependencyFactory.GetManager (depName, this);
                 var depProject = depManager.GetProject ();
                 if (depProject == null) continue;
                 var depSources = depProject.GetAllSources ();
@@ -222,7 +248,7 @@ internal class Project : Object {
 
             // Get dependency libs
             foreach (var depName in Dependency) {
-                var depManager = DependencyFactory.GetManager (depName);
+                var depManager = DependencyFactory.GetManager (depName, this);
                 if (depManager is LibManager) {
                     var libManager = (LibManager) depManager;
                     libArr.add (libManager.LibName);

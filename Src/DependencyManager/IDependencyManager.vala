@@ -8,6 +8,11 @@ internal interface IDependencyManager : Object {
     public abstract void SetPath (string path) throws Errors.Common;
 
     /*
+    *   Set parent project
+    */
+    public abstract void SetProject (Project project) throws Errors.Common;
+
+    /*
     *   Check dependency exists
     */
     public abstract void CheckDependency () throws Errors.Common;

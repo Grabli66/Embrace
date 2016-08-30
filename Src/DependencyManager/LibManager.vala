@@ -8,6 +8,11 @@ internal class LibManager : Object, IDependencyManager {
     public string LibName;
 
     /*
+    *   Parent project
+    */
+    private Project _project;
+
+    /*
     *   Set path for dependency
     */
     public void SetPath (string path) throws Errors.Common {
@@ -17,6 +22,13 @@ internal class LibManager : Object, IDependencyManager {
             throw new Errors.Common ("Cant set path to dependency");
         }
     }
+
+    /*
+    *   Set parent project
+    */
+    public void SetProject (Project project) throws Errors.Common {
+        _project = project;
+    }    
 
     /*
     *   Check dependency exists.

@@ -25,10 +25,10 @@ Project file format:
 Create new project (WORK): 
 #### embrace --init
 
-Build project (PARTIALY WORK):
+Build project (WORK):
 #### embrace --build
 
-Run tests (PARTIALY WORK):
+Run tests (WORK):
 #### embrace --test
 
 Update project dependency (NOT WORK):

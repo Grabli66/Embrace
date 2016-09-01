@@ -46,7 +46,7 @@ internal class Project : Object {
     \"Description\" : \"Project description\",
     \"Version\" : \"0.1\",
     \"ProjectType\" : \"app\",
-    \"Source\" : [\"./Src\"],
+    \"Source\" : [\"./Source\"],
     \"Tests\" : \"./Tests\",
     \"OutPath\" : \"./Bin\",
     \"Dependency\" : [
@@ -63,6 +63,7 @@ internal class Project : Object {
     \"Source\" : [\".\"],    
     \"OutPath\" : \"../Bin\",
     \"Dependency\" : [
+        \"path://..\"
     ]
 }";
 

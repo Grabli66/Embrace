@@ -3,7 +3,7 @@
     "Description" : "Project and dependency manager for vala",
     "Version" : "0.2",
     "ProjectType" : "app",
-    "Source" : ["./Src"],
+    "Source" : ["./Source"],
     "Tests" : "./Tests",
     "OutPath" : "./Bin",
     "Dependency" : [

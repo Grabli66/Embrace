@@ -16,7 +16,7 @@ internal class BuildCommand {
     /*
     *   Build project
     */
-    public static void BuildProject (Project project) throws Errors.Common {
+    public static void BuildProject (Project project) throws Errors.Common {        
         var sources = project.GetAllSources ();
         var libs = project.GetAllLibs ();
 
@@ -58,7 +58,7 @@ internal class BuildCommand {
             var argArr = argList.to_array ();
             var commandLine = string.joinv (" ", argArr);
             InfoLn (commandLine);
-            GLib.Process.spawn_command_line_sync (commandLine);
+            GLib.Process.spawn_command_line_sync (commandLine);            
         } catch {
             throw new Errors.Common ("Cant compile sources");
         }
@@ -68,12 +68,10 @@ internal class BuildCommand {
     *   Build project
     */
     public static void BuildPath (string path = ".") {
-        try {
-            InfoLn ("Building project");
+        try {            
             var project = new Project (path);
             ProcessDependency (project);
-            BuildProject (project);
-            InfoLn ("Done");
+            BuildProject (project);            
         } catch (Error e) {
             ErrorLn (e.message);
         }
@@ -83,6 +81,7 @@ internal class BuildCommand {
     *   Process command
     */
     public static void Process () {
-        BuildPath ();
+        InfoLn ("Building project");
+        BuildPath ();        
     }
 }
